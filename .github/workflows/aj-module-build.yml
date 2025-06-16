@@ -1,0 +1,46 @@
+
+name: Build and Package Debezium (Manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      module:
+        type: string
+        default: "debezium-connector-mysql"
+        description: "Module to build and package"
+
+jobs:
+  build:
+    name: Build ${{ github.event.inputs.module }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Build selected module
+        run: |
+          MODULE=${{ github.event.inputs.module }}
+          cd $MODULE
+          mvn clean package -Passembly -Dquick -DskipITs
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ github.event.inputs.module }}-build
+          path: ${{ github.event.inputs.module }}/target/*.tar.gz
+	
