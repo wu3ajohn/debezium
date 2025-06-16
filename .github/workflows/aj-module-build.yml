@@ -42,5 +42,5 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ${{ github.event.inputs.module }}-build
-          path: ${{ github.event.inputs.module }}/target/*.tar.gz
+          path: '${{ github.event.inputs.module }}/target/*.tar.gz'
 	
